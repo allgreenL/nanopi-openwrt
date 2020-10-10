@@ -5,8 +5,10 @@ on:
     branches: [ master ]
     paths:
       - '.github/workflows/r2s_lean_minimal.yml'
-  schedule:
-    - cron: '10 08 * * *'
+#  schedule:
+#    - cron: '10 08 * * *'
+  watch:
+    types: started
 
 jobs:
 
@@ -73,23 +75,9 @@ jobs:
           . x_assemble_artifact.sh
           release_tag="R2S-Minimal-$(date +%Y-%m-%d)"
           echo "##[set-output name=release_tag;]$release_tag"
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.sec_token }}
+          
+      - name: Upload firmware directory
+        uses: actions/upload-artifact@main
         with:
-          tag_name: ${{ steps.assemble_artifact.outputs.release_tag }}
-          release_name: 自动发布 ${{ steps.assemble_artifact.outputs.release_tag }}
-          draft: false
-          prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.sec_token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./artifact.zip
-          asset_name: ${{ steps.assemble_artifact.outputs.release_tag }}-ROM.zip
-          asset_content_type: application/zip
+          name: ${{ steps.assemble_artifact.outputs.release_tag }}-ROM.zip
+          path: ./artifact.zip    
